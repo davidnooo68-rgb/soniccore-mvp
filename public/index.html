@@ -3,73 +3,648 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>SonicCore BGM版权检测</title>
+  <title>SonicCore BGM 版权检测</title>
   <style>
-    body{font-family:system-ui,sans-serif;background:#0a0a1a;color:#e2e8f0;margin:0;padding:20px}
-    h1{text-align:center;color:#818cf8}
-    .card{background:#111128;border:1px solid rgba(99,102,241,0.15);border-radius:14px;padding:20px;max-width:600px;margin:20px auto}
-    .btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:bold}
-    .btn-primary{background:#6366f1;color:#fff}
-    .tab{background:transparent;border:1px solid #333;padding:8px 16px;color:#64748b;cursor:pointer}
-    .tab.active{background:#6366f1;color:#fff}
-    #tabUrl{display:block}#tabManual{display:none}
-    #tabUrl.hidden{display:none}#tabManual.hidden{display:block}
-    input,select{width:100%;padding:10px;margin:5px 0;background:rgba(255,255,255,0.1);border:1px solid #333;color:#fff;border-radius:6px}
-    .rbox{margin-top:20px;padding:15px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.4);border-radius:10px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0a0a1a;
+      --card:#111128;
+      --border:rgba(99,102,241,0.15);
+      --primary:#6366f1;
+      --pl:#818cf8;
+      --text:#e2e8f0;
+      --td:#64748b;
+      --tm:#94a3b8;
+      --ok:#10b981;
+      --warn:#f59e0b;
+      --err:#ef4444
+    }
+    body{
+      font-family:'Microsoft YaHei','PingFang SC',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh
+    }
+    
+    /* Hero Section */
+    .hero{
+      text-align:center;
+      padding:80px 20px 60px;
+      position:relative;
+      overflow:hidden
+    }
+    .hero::before{
+      content:'';
+      position:absolute;
+      top:-50%;
+      left:50%;
+      transform:translateX(-50%);
+      width:600px;
+      height:600px;
+      background:radial-gradient(circle,rgba(99,102,241,0.15),transparent 70%);
+      pointer-events:none
+    }
+    .hb{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(99,102,241,0.12);
+      border:1px solid rgba(99,102,241,0.3);
+      color:var(--pl);
+      padding:6px 16px;
+      border-radius:999px;
+      font-size:13px;
+      margin-bottom:24px
+    }
+    .hb .d{
+      width:6px;
+      height:6px;
+      background:var(--ok);
+      border-radius:50%;
+      animation:pulse 2s infinite
+    }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    .hero h1{
+      font-size:clamp(32px,5vw,52px);
+      font-weight:900;
+      background:linear-gradient(135deg,#fff 40%,var(--pl));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      margin-bottom:12px
+    }
+    .tagline{
+      font-size:16px;
+      color:var(--td);
+      max-width:500px;
+      margin:0 auto 32px
+    }
+    .stats{
+      display:flex;
+      justify-content:center;
+      gap:40px
+    }
+    .stat{text-align:center}
+    .sn{
+      font-size:28px;
+      font-weight:900;
+      color:var(--pl)
+    }
+    .sl{font-size:12px;color:var(--td)}
+    
+    /* Container */
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:0 20px 60px
+    }
+    
+    /* Card */
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:32px;
+      margin-bottom:24px
+    }
+    .ctitle{
+      font-size:18px;
+      font-weight:800;
+      color:#fff;
+      margin-bottom:4px
+    }
+    .csub{
+      font-size:13px;
+      color:var(--td);
+      margin-bottom:24px
+    }
+    
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap:4px;
+      background:rgba(255,255,255,0.04);
+      padding:4px;
+      border-radius:10px;
+      margin-bottom:28px;
+      width:fit-content
+    }
+    .tab{
+      padding:8px 20px;
+      border-radius:7px;
+      font-size:14px;
+      font-weight:600;
+      cursor:pointer;
+      border:none;
+      background:transparent;
+      color:var(--td);
+      transition:all 0.2s
+    }
+    .tab.active{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 2px 8px rgba(99,102,241,0.4)
+    }
+    .tab:hover:not(.active){
+      color:var(--text);
+      background:rgba(255,255,255,0.06)
+    }
+    
+    /* Form */
+    .fg{margin-bottom:20px}
+    label{
+      display:block;
+      font-size:13px;
+      font-weight:600;
+      color:var(--tm);
+      margin-bottom:8px
+    }
+    input,select,textarea{
+      width:100%;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:8px;
+      padding:12px 16px;
+      font-size:14px;
+      color:var(--text);
+      font-family:inherit;
+      transition:border-color 0.2s;
+      outline:none
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(99,102,241,0.15)
+    }
+    input::placeholder,textarea::placeholder{color:var(--td)}
+    select option{background:#1a1a2e;color:#fff}
+    textarea{resize:vertical;min-height:80px}
+    
+    .g2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px
+    }
+    @media(max-width:600px){
+      .g2{grid-template-columns:1fr}
+    }
+    
+    /* Buttons */
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:12px 28px;
+      border-radius:8px;
+      font-size:15px;
+      font-weight:700;
+      font-family:inherit;
+      cursor:pointer;
+      border:none;
+      transition:all 0.2s
+    }
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 2px 12px rgba(99,102,241,0.35)
+    }
+    .btn-primary:hover{
+      background:var(--pl);
+      transform:translateY(-1px)
+    }
+    .btn-primary:disabled{
+      opacity:0.5;
+      cursor:not-allowed
+    }
+    .btn-ol{
+      background:transparent;
+      color:var(--tm);
+      border:1px solid rgba(255,255,255,0.15)
+    }
+    .btn-ol:hover{
+      border-color:var(--primary);
+      color:var(--pl)
+    }
+    .mt{margin-top:16px}
+    
+    /* Result Area */
+    #rArea{display:none;margin-top:24px}
+    .rbox{
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px;
+      padding:24px
+    }
+    .rlow{border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.05)}
+    .rmed{border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.05)}
+    .rhi{border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.05)}
+    .rbdge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 16px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:700
+    }
+    .rlow .rbdge{background:rgba(16,185,129,0.15);color:var(--ok)}
+    .rmed .rbdge{background:rgba(245,158,11,0.15);color:var(--warn)}
+    .rhi .rbdge{background:rgba(239,68,68,0.15);color:var(--err)}
+    .rmeta{margin-top:12px;font-size:13px;color:var(--td)}
+    .ract{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+    .ract .btn{padding:8px 20px;font-size:13px}
+    
+    /* Loading */
+    #loading{
+      display:none;
+      align-items:center;
+      gap:10px;
+      padding:16px 0;
+      font-size:14px;
+      color:var(--td)
+    }
+    .sp{
+      width:20px;
+      height:20px;
+      border:2px solid rgba(99,102,241,0.2);
+      border-top-color:var(--primary);
+      border-radius:50%;
+      animation:spin 0.8s linear infinite
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    /* History */
+    .rlist{display:flex;flex-direction:column;gap:10px}
+    .ri{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 18px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:8px;
+      font-size:13px
+    }
+    .ri .rid{font-family:monospace;color:var(--pl);font-weight:600}
+    .ri .rt{color:var(--td)}
+    .ri a{color:var(--pl);text-decoration:none;font-weight:600}
+    .ri a:hover{text-decoration:underline}
+    
+    /* Toast */
+    .toast{
+      position:fixed;
+      bottom:30px;
+      right:30px;
+      background:#1a1a2e;
+      border:1px solid rgba(99,102,241,0.3);
+      border-radius:10px;
+      padding:14px 20px;
+      font-size:14px;
+      font-weight:600;
+      color:var(--text);
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+      transform:translateY(20px);
+      opacity:0;
+      transition:all 0.3s;
+      z-index:1000;
+      max-width:320px
+    }
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.ok{border-color:rgba(16,185,129,0.4)}
+    .toast.fail{border-color:rgba(239,68,68,0.4)}
+    
+    /* Demo Banner */
+    .dbanner{
+      background:rgba(245,158,11,0.1);
+      border:1px solid rgba(245,158,11,0.3);
+      border-radius:10px;
+      padding:14px 20px;
+      font-size:13px;
+      color:var(--warn);
+      margin-bottom:24px;
+      display:flex;
+      align-items:center;
+      gap:10px
+    }
+    .dbanner b{color:#fbbf24}
+    
+    /* Footer */
+    footer{
+      text-align:center;
+      padding:40px 20px;
+      font-size:12px;
+      color:var(--td);
+      border-top:1px solid rgba(255,255,255,0.05)
+    }
+    footer a{color:var(--pl);text-decoration:none}
+    footer a:hover{text-decoration:underline}
+    
+    .hidden{display:none!important}
+    .tm{color:var(--td);font-size:13px}
   </style>
 </head>
 <body>
-  <h1>SonicCore BGM 版权检测</h1>
-  <div class="card">
-    <div style="margin-bottom:15px">
-      <button class="tab active" id="tabBtnUrl" onclick="sTab('url')">视频URL</button>
-      <button class="tab" id="tabBtnMan" onclick="sTab('manual')">手动输入</button>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hb"><span class="d"></span>MVP 已上线 · 内测阶段</div>
+    <h1>SonicCore BGM 版权检测</h1>
+    <p class="tagline">输入视频BGM，一键识别歌曲 + 判断版权风险，3分钟出合规报告</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="sn" id="sTotal">0</div>
+        <div class="sl">已完成检测</div>
+      </div>
+      <div class="stat">
+        <div class="sn" id="sHigh">0</div>
+        <div class="sl">高风险识别</div>
+      </div>
+      <div class="stat">
+        <div class="sn">100%</div>
+        <div class="sl">本地处理</div>
+      </div>
     </div>
-    <div id="tabUrl">
-      <input type="text" id="audioUrl" placeholder="视频URL">
-      <input type="text" id="knownTitle" placeholder="歌曲名称（可选）">
-      <input type="text" id="knownArtist" placeholder="艺术家（可选）">
-    </div>
-    <div id="tabManual">
-      <input type="text" id="manualTitle" placeholder="歌曲名称 *">
-      <input type="text" id="manualArtist" placeholder="艺术家">
-    </div>
-    <select id="usageType" style="margin-top:10px">
-      <option value="short_form">短视频</option>
-      <option value="drama">出海短剧</option>
-      <option value="ad">广告</option>
-    </select>
-    <select id="targetMarket">
-      <option value="global">全球</option>
-      <option value="southeast_asia">东南亚</option>
-      <option value="china">中国</option>
-    </select>
-    <button class="btn btn-primary" style="margin-top:15px" onclick="submitD()">开始检测</button>
-    <div id="rArea"></div>
   </div>
+  
+  <!-- Main Content -->
+  <div class="container">
+    <div class="dbanner" id="dBanner">AudD Token 已配置！输入视频URL即可自动识别歌曲</div>
+    
+    <!-- New Detection Card -->
+    <div class="card">
+      <div class="ctitle">新建检测任务</div>
+      <div class="csub">填写以下信息，自动识别BGM并判断版权风险</div>
+      
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" id="tabBtnUrl" onclick="sTab('url')">视频URL</button>
+        <button class="tab" id="tabBtnMan" onclick="sTab('manual')">手动输入</button>
+      </div>
+      
+      <!-- URL Tab -->
+      <div id="tabUrl">
+        <div class="fg">
+          <label>视频/音频 URL（YouTube / TikTok / 抖音 等） <span style="color:var(--err)">*</span></label>
+          <input type="url" id="audioUrl" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+        <div class="g2">
+          <div class="fg">
+            <label>歌曲名称（可选）</label>
+            <input type="text" id="knownTitle" placeholder="如已知可填写">
+          </div>
+          <div class="fg">
+            <label>艺术家（可选）</label>
+            <input type="text" id="knownArtist" placeholder="歌手/乐队名称">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Manual Tab -->
+      <div id="tabManual" class="hidden">
+        <div class="g2">
+          <div class="fg">
+            <label>歌曲名称 <span style="color:var(--err)">*</span></label>
+            <input type="text" id="manualTitle" placeholder="输入歌曲名称">
+          </div>
+          <div class="fg">
+            <label>艺术家</label>
+            <input type="text" id="manualArtist" placeholder="歌手/乐队名称">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Options -->
+      <div class="g2" style="margin-top:16px">
+        <div class="fg">
+          <label>用途类型 <span style="color:var(--err)">*</span></label>
+          <select id="usageType">
+            <option value="short_form">短视频（TikTok/抖音/Reels）</option>
+            <option value="drama">出海短剧</option>
+            <option value="ad">广告/推广内容</option>
+            <option value="game">游戏/应用内BGM</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>目标市场 <span style="color:var(--err)">*</span></label>
+          <select id="targetMarket">
+            <option value="global">全球（欧美为主）</option>
+            <option value="southeast_asia">东南亚</option>
+            <option value="china">中国大陆</option>
+            <option value="multiple">多个市场</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Notes -->
+      <div class="fg">
+        <label>客户备注（选填）</label>
+        <textarea id="notes" rows="2" placeholder="客户名称、特殊要求等..."></textarea>
+      </div>
+      
+      <!-- Loading -->
+      <div id="loading">
+        <div class="sp"></div>
+        <span>正在识别BGM，请稍候...</span>
+      </div>
+      
+      <!-- Result Area -->
+      <div id="rArea"></div>
+      
+      <!-- Actions -->
+      <div class="mt">
+        <button class="btn btn-primary" id="sBtn" onclick="submitD()">开始检测</button>
+        <button class="btn btn-ol" onclick="clearF()" style="margin-left:10px">重置</button>
+      </div>
+    </div>
+    
+    <!-- History Card -->
+    <div class="card">
+      <div class="ctitle">历史报告</div>
+      <div class="csub">最近生成的版权检测报告</div>
+      <div id="rHistory" class="rlist">
+        <div class="tm">暂无报告记录...</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer>SonicCore 声核逻辑 · MVP v1.0 · support@soniccore.io</footer>
+  
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+  
+  <!-- JavaScript -->
   <script>
     var API = 'https://soniccore-mvp.onrender.com';
+    
     function sTab(t) {
       document.getElementById('tabBtnUrl').classList.toggle('active', t === 'url');
       document.getElementById('tabBtnMan').classList.toggle('active', t === 'manual');
       document.getElementById('tabUrl').classList.toggle('hidden', t !== 'url');
       document.getElementById('tabManual').classList.toggle('hidden', t !== 'manual');
     }
-    async function submitD() {
-      var isUrl = document.getElementById('tabUrl').style.display !== 'none';
-      var p = { usageType: document.getElementById('usageType').value, targetMarket: document.getElementById('targetMarket').value };
-      if (isUrl) { p.title = document.getElementById('knownTitle').value; p.artist = document.getElementById('knownArtist').value; }
-      else { p.title = document.getElementById('manualTitle').value; p.artist = document.getElementById('manualArtist').value; }
-      if (!p.title) { alert('请填写歌曲名称'); return; }
-      document.getElementById('rArea').innerHTML = '<div class="rbox">正在检测...</div>';
-      try {
-        var r = await fetch(API + '/api/identify', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(p) });
-        var d = await r.json();
-        var song = d.result || {}; var cp = d.copyright || {}; var risk = cp.risk || 'MEDIUM';
-        var rt = {LOW:'低风险',MEDIUM:'中风险',HIGH:'高风险'}[risk];
-        document.getElementById('rArea').innerHTML = '<div class="rbox">✅ ' + rt + ' - ' + (song.title || p.title) + '</div>';
-      } catch (e) { document.getElementById('rArea').innerHTML = '<div class="rbox">错误: ' + e.message + '</div>'; }
+    
+    function toast(m, t) {
+      t = t || 'i';
+      var el = document.getElementById('toast');
+      el.textContent = m;
+      el.className = 'toast ' + (t === 'fail' ? 'fail' : t === 'ok' ? 'ok' : '') + ' show';
+      setTimeout(function() { el.classList.remove('show'); }, 3500);
     }
+    
+    var busy = false;
+    
+    async function submitD() {
+      if (busy) return;
+      busy = true;
+      
+      var btn = document.getElementById('sBtn');
+      var load = document.getElementById('loading');
+      var rArea = document.getElementById('rArea');
+      var isUrl = !document.getElementById('tabUrl').classList.contains('hidden');
+      
+      var p = {
+        usageType: document.getElementById('usageType').value,
+        targetMarket: document.getElementById('targetMarket').value,
+        notes: document.getElementById('notes').value
+      };
+      
+      if (isUrl) {
+        p.audioUrl = document.getElementById('audioUrl').value.trim();
+        p.title = document.getElementById('knownTitle').value.trim();
+        p.artist = document.getElementById('knownArtist').value.trim();
+      } else {
+        p.title = document.getElementById('manualTitle').value.trim();
+        p.artist = document.getElementById('manualArtist').value.trim();
+      }
+      
+      if (!p.audioUrl && !p.title) {
+        toast('请填写歌曲名称或视频URL', 'fail');
+        busy = false;
+        return;
+      }
+      
+      btn.disabled = true;
+      load.style.display = 'flex';
+      rArea.style.display = 'none';
+      
+      try {
+        var r = await fetch(API + '/api/identify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(p)
+        });
+        var d = await r.json();
+        
+        if (!d.success) {
+          toast(d.error || '检测失败', 'fail');
+          return;
+        }
+        
+        rArea.innerHTML = buildR(d, p);
+        rArea.style.display = 'block';
+        rArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+        await fetch(API + '/api/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            song: d.result || {},
+            copyright: d.copyright || {},
+            identifySource: d.demo ? 'demo' : 'manual',
+            usageType: p.usageType,
+            targetMarket: p.targetMarket,
+            notes: p.notes
+          })
+        });
+        
+        loadStats();
+        loadHistory();
+        toast('检测完成！', 'ok');
+      } catch (e) {
+        toast('网络错误，请检查服务是否启动', 'fail');
+      } finally {
+        btn.disabled = false;
+        load.style.display = 'none';
+        busy = false;
+      }
+    }
+    
+    function buildR(d, p) {
+      var song = d.result || {};
+      var cp = d.copyright || {};
+      var risk = cp.risk || 'MEDIUM';
+      
+      var rt = {LOW: '低风险', MEDIUM: '中风险', HIGH: '高风险'}[risk];
+      var rc = {LOW: 'rlow', MEDIUM: 'rmed', HIGH: 'rhi'}[risk];
+      var icon = {LOW: '&#x2705;', MEDIUM: '&#x26A1;', HIGH: '&#x1F6A8;'}[risk];
+      
+      var mi = '';
+      if (d.demo) mi = '<span style="color:#f59e0b">演示模式 - 请配置 AUDD_API_TOKEN</span>';
+      else if (song.title) mi = '<strong>' + song.title + '</strong>' + (song.artist ? ' &#8212; ' + song.artist : '');
+      else mi = '<em style="color:#64748b">未能自动识别</em>';
+      
+      var adv = '';
+      if (risk === 'LOW') adv = '<li>&#x2705; 该曲目风险较低，建议保留授权记录</li><li>&#x1F4BE; 保存音乐购买凭证，以备核查</li>';
+      else if (risk === 'HIGH') adv = '<li>&#x26A0; 该曲目存在较高版权风险，建议替换为免版权音乐</li><li>&#x1F504; 推荐：Pixabay / Artlist / Epidemic Sound</li><li>&#x1F4DE; 如必须使用，建议联系版权方获取商用授权</li>';
+      else adv = '<li>&#x26A1; 建议进一步核实音乐来源和授权状态</li><li>&#x1F4DE; 可通过 ASCAP / BMI / SoundExchange 查询</li><li>&#x1F50D; 确认是否属于免版权库或已购买商业授权</li>';
+      
+      return '<div class="rbox ' + rc + '">' +
+        '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+        '<span class="rbdge">' + icon + ' ' + rt + '</span>' +
+        '<span class="rmeta">' + (cp.note || '') + '</span></div>' +
+        '<div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08)">' +
+        '<div class="rmeta" style="margin-bottom:8px">&#x1F3B5; 识别结果</div>' +
+        '<div style="font-size:15px;color:#e2e8f0;margin-bottom:12px">' + mi + '</div>' +
+        '<div class="rmeta" style="margin-bottom:8px">&#x1F50D; 合规建议</div>' +
+        '<ul style="font-size:14px;line-height:2;padding-left:20px;color:#64748b">' + adv + '</ul>' +
+        '<div class="ract">' +
+        '<button class="btn btn-primary" onclick="window.open('/reports/REP-latest.html','_blank')">查看报告</button>' +
+        '<button class="btn btn-ol" onclick="copyResult()">复制结果</button></div>' +
+        '</div></div>';
+    }
+    
+    function copyResult() {
+      var el = document.getElementById('rArea');
+      if (el.innerText) navigator.clipboard.writeText(el.innerText).then(function() { toast('已复制到剪贴板', 'ok'); });
+    }
+    
+    function clearF() {
+      ['audioUrl', 'knownTitle', 'knownArtist', 'manualTitle', 'manualArtist', 'notes'].forEach(function(id) { document.getElementById(id).value = ''; });
+      document.getElementById('rArea').style.display = 'none';
+    }
+    
+    async function loadStats() {
+      try {
+        var r = await fetch(API + '/api/health');
+        var d = await r.json();
+        if (d.demo) document.getElementById('dBanner').style.display = 'flex';
+        else document.getElementById('dBanner').style.display = 'none';
+        
+        var hr = await fetch(API + '/api/reports');
+        var hd = await hr.json();
+        var n = hd.reports ? hd.reports.length : 0;
+        var hi = hd.reports ? hd.reports.filter(function(r) { return r.high; }).length : 0;
+        document.getElementById('sTotal').textContent = n;
+        document.getElementById('sHigh').textContent = hi;
+      } catch (e) {}
+    }
+    
+    async function loadHistory() {
+      try {
+        var r = await fetch(API + '/api/reports');
+        var d = await r.json();
+        var el = document.getElementById('rHistory');
+        if (!d.reports || !d.reports.length) {
+          el.innerHTML = '<div class="tm">暂无报告记录...</div>';
+          return;
+        }
+        el.innerHTML = d.reports.slice(0, 20).map(function(r) {
+          return '<div class="ri"><span class="rid">' + r.id + '</span><span class="rt">' + (r.time || '') + '</span><a href="/reports/' + r.file + '" target="_blank">查看报告</a></div>';
+        }).join('');
+      } catch (e) {}
+    }
+    
+    loadStats();
+    loadHistory();
   </script>
 </body>
 </html>
