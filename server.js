@@ -165,6 +165,10 @@ function serveStatic(req, res) {
   if (!fs2.existsSync(fp)) { res.writeHead(404); return res.end('not found'); }
   const ext = path2.extname(fp);
   res.setHeader('Content-Type', MIME[ext] || 'text/plain; charset=utf-8');
+  // 禁用缓存，确保总是获取最新版本
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.end(fs2.readFileSync(fp));
 }
