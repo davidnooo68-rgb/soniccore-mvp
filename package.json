@@ -1,0 +1,11 @@
+{
+  "name": "soniccore-mvp",
+  "version": "1.0.0",
+  "description": "SonicCore BGM Copyright Detection MVP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {}
+}
